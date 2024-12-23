@@ -15,6 +15,7 @@ st.markdown(
         visibility: hidden;
     }
     ._profilePreview_gzau3_63, ._container_gzau3_1 {
+        display: flex !important;
         display: none !important;
     }
     </style>
