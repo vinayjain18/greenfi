@@ -17,7 +17,7 @@ st.markdown(
     ._profilePreview_gzau3_63 {
         display: none;
     }
-    ._container_gzau3_1 {
+    ._container_gzau3_1{
         display: none;
     }
     </style>
