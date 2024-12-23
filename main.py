@@ -14,11 +14,8 @@ st.markdown(
         display: none;
         visibility: hidden;
     }
-    ._profilePreview_gzau3_63 {
-        display: none;
-    }
-    ._container_gzau3_1{
-        display: none;
+    ._profilePreview_gzau3_63, ._container_gzau3_1 {
+        display: none !important;
     }
     </style>
     """,
