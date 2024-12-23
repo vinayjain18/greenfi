@@ -7,6 +7,24 @@ import hmac
 load_dotenv()
 
 st.set_page_config(page_title="GreenFi", layout="wide")
+hide_icon = """
+.stToolbarActionButton {
+  visibility: hidden;
+}
+"""
+st.markdown(
+    """
+    <style>
+    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
+    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
+    .viewerBadge_text__1JaDK {
+        display: none;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 def check_password():
     """Returns `True` if the user had a correct password."""
