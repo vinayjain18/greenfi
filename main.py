@@ -10,7 +10,7 @@ st.set_page_config(page_title="GreenFi", layout="wide")
 st.markdown(
     """
     <style>
-    .stToolbarActionButton {
+    .stToolbarActionButton ._profilePreview_gzau3_63 ._container_gzau3_1{
         display: none;
         visibility: hidden;
     }
