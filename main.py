@@ -15,8 +15,8 @@ st.markdown(
         visibility: hidden;
     }
     ._profilePreview_gzau3_63, ._container_gzau3_1 {
-        display: flex !important;
         display: none !important;
+        visibility: hidden;
     }
     </style>
     """,
@@ -110,24 +110,45 @@ def search_company():
             st.error("Failed to fetch companies")
 
 def update_company_details(company=None):
-    st.title("Update CompanyDetails")
-    company_id = st.text_input("Enter Company ID:", value=company['id'] if company else "")
-    new_name = st.text_input("Updated Company Name:", value=company['name'] if company else "")
-    new_industry = st.text_input("Updated Industry:", value=company['industry'] if company else "")
-    new_country_iso_code = st.text_input("Updated Country:", value=company['country'] if company else "")
-    if st.button("Update"):
-        response = requests.post(f"{BASE_URL}/company/edit", data={
-            "company_id": company_id,
-            "name": new_name,
-            "industry": new_industry,
-            "country_iso_code": new_country_iso_code
-        })
-        if response.status_code == 200:
-            st.success("Company details updated successfully")
-            st.write(response.json())
-        else:
-            st.error("Failed to update company details")
-            st.write(response.json())
+    st.title("Update Company Details")
+    
+    try:
+        conn = connect()
+        if conn is None:
+            st.error('Failed to connect to the database')
+            return
+        
+        cursor = conn.cursor()
+        # Fetch unique country ISO codes for the dropdown
+        cursor.execute("SELECT DISTINCT country_iso_code FROM greenfi_datamart.d_company_details")
+        countries = [row[0] for row in cursor.fetchall()]
+        
+        company_id = st.text_input("Enter Company ID:", value=company['id'] if company else "")
+        new_name = st.text_input("Updated Company Name:", value=company['name'] if company else "")
+        new_industry = st.text_input("Updated Industry:", value=company['industry'] if company else "")
+        new_country_iso_code = st.selectbox("Updated Country:", options=[""] + countries, index=countries.index(company['country']) if company else 0)
+        
+        if st.button("Update"):
+            response = requests.post(f"{BASE_URL}/company/edit", data={
+                "company_id": company_id,
+                "name": new_name,
+                "industry": new_industry,
+                "country_iso_code": new_country_iso_code
+            })
+            if response.status_code == 200:
+                st.success("Company details updated successfully")
+                st.write(response.json())
+            else:
+                st.error("Failed to update company details")
+                st.write(response.json())
+        
+        cursor.close()
+        
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+    finally:
+        if conn and conn.is_connected():
+            disconnect(conn)
 
 def delete_company(company_id=None):
     st.title("Delete Company")
@@ -143,22 +164,43 @@ def delete_company(company_id=None):
 
 def add_company_details():
     st.title("Add Company Details")
-    company_name = st.text_input("Company Name:")
-    country_iso_code = st.text_input("Country:")
-    industry = st.text_input("Industry:")
+    
+    try:
+        conn = connect()
+        if conn is None:
+            st.error('Failed to connect to the database')
+            return
+        
+        cursor = conn.cursor()
+        # Fetch unique country ISO codes for the dropdown
+        cursor.execute("SELECT DISTINCT country_iso_code FROM greenfi_datamart.d_company_details")
+        countries = [row[0] for row in cursor.fetchall()]
+        
+        company_name = st.text_input("Company Name:")
+        country_iso_code = st.selectbox("Country:", options=[""] + countries)
+        industry = st.text_input("Industry:")
 
-    if st.button("Add Company"):
-        response = requests.post(f"{BASE_URL}/addCompanyDetails", json={
-            "company_name": company_name,
-            "country_iso_code": country_iso_code,
-            "industry_name": industry
-        })
-        if response.status_code == 200:
-            st.success("Company added successfully")
-            st.write(response.json())
-        else:
-            st.error("Failed to add company")
-            st.write(response.json())
+        if st.button("Add Company"):
+            response = requests.post(f"{BASE_URL}/addCompanyDetails", json={
+                "company_name": company_name,
+                "country_iso_code": country_iso_code,
+                "industry_name": industry
+            })
+            if response.status_code == 200:
+                st.success("Company added successfully")
+                st.write(response.json())
+            else:
+                st.error("Failed to add company")
+                st.write(response.json())
+        
+        cursor.close()
+        
+    except Exception as e:
+        st.error(f"Error: {str(e)}")
+    finally:
+        if conn and conn.is_connected():
+            disconnect(conn)
+    
 
 def search_companies_by_name_and_country():
     st.title("Search Company")
@@ -212,25 +254,6 @@ def search_companies_by_name_and_country():
             st.write(f"Total: {len(companies)}")
             st.table(companies)
 
-            # Add column headers
-            # col1, col2, col3, col4, col5, col6 = st.columns([1, 3, 1, 2, 1, 1])
-            # col1.write("ID")
-            # col2.write("Name")
-            # col3.write("Country")
-            # col4.write("Industry")
-            # col5.write("Edit")
-            # col6.write("Delete")
-
-            # for company in companies:
-            #     col1, col2, col3, col4, col5, col6 = st.columns([1, 3, 1, 2, 1, 1])
-            #     col1.write(company['id'])
-            #     col2.write(company['name'])
-            #     col3.write(company['country'])
-            #     col4.write(company['industry'])
-            #     if col5.button("Edit", key=f"edit_{company['id']}"):
-            #         st.session_state.edit_company_id = company['id']
-            #     if col6.button("Delete", key=f"delete_{company['id']}"):
-            #         st.session_state.delete_company_id = company['id']
         cursor.close()
         
     except Exception as e:
@@ -239,20 +262,6 @@ def search_companies_by_name_and_country():
         if conn and conn.is_connected():
             disconnect(conn)
 
-    # # Handle edit modal
-    # if st.session_state.edit_company_id is not None:
-    #     company_to_edit = next((c for c in companies if c['id'] == st.session_state.edit_company_id), None)
-    #     if company_to_edit:
-    #         with st.modal("Edit Company Details"):
-    #             update_company_details(company_to_edit)
-    #         st.session_state.edit_company_id = None
-    # # Handle delete modal
-    # if st.session_state.delete_company_id is not None:
-    #     company_to_delete = next((c for c in companies if c['id'] == st.session_state.delete_company_id), None)
-    #     if company_to_delete:
-    #         with st.modal("Delete Company"):
-    #             delete_company(company_to_delete['id'])
-    #         st.session_state.delete_company_id = None
 
 # Streamlit app navigation
 st.sidebar.title("Navigation")
