@@ -120,7 +120,7 @@ def update_company_details(company=None):
         
         cursor = conn.cursor()
         # Fetch unique country ISO codes for the dropdown
-        cursor.execute("SELECT DISTINCT country_iso_code FROM greenfi_datamart.d_company_details")
+        cursor.execute("SELECT DISTINCT country_iso_code FROM d_company_details")
         countries = [row[0] for row in cursor.fetchall()]
         
         company_id = st.text_input("Enter Company ID:", value=company['id'] if company else "")
@@ -173,7 +173,7 @@ def add_company_details():
         
         cursor = conn.cursor()
         # Fetch unique country ISO codes for the dropdown
-        cursor.execute("SELECT DISTINCT country_iso_code FROM greenfi_datamart.d_company_details")
+        cursor.execute("SELECT DISTINCT country_iso_code FROM d_company_details")
         countries = [row[0] for row in cursor.fetchall()]
         
         company_name = st.text_input("Company Name:")
@@ -217,7 +217,7 @@ def search_companies_by_name_and_country():
         
         cursor = conn.cursor()
         # Fetch unique country ISO codes for the dropdown
-        cursor.execute("SELECT DISTINCT country_iso_code FROM greenfi_datamart.d_company_details")
+        cursor.execute("SELECT DISTINCT country_iso_code FROM d_company_details")
         countries = [row[0] for row in cursor.fetchall()]
         search_term = st.text_input("Enter company name to search:")
         country = st.selectbox("Select country (optional):", options=[""] + countries)
@@ -226,21 +226,21 @@ def search_companies_by_name_and_country():
             if search_term and country:
                 query = """
                 SELECT company_id, name, country_iso_code, industry
-                FROM greenfi_datamart.d_company_details
+                FROM d_company_details
                 WHERE name LIKE %s AND country_iso_code = %s
                 """
                 cursor.execute(query, ('%' + search_term + '%', country))
             elif search_term:
                 query = """
                 SELECT company_id, name, country_iso_code, industry
-                FROM greenfi_datamart.d_company_details
+                FROM d_company_details
                 WHERE name LIKE %s
                 """
                 cursor.execute(query, ('%' + search_term + '%',))
             elif country:
                 query = """
                 SELECT company_id, name, country_iso_code, industry
-                FROM greenfi_datamart.d_company_details
+                FROM d_company_details
                 WHERE country_iso_code = %s
                 """
                 cursor.execute(query, (country,))
